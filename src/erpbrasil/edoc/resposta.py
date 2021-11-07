@@ -5,7 +5,8 @@
 import re
 
 from lxml import etree
-
+from xsdata.formats.dataclass.context import XmlContext
+from xsdata.formats.dataclass.parsers import XmlParser
 
 class RetornoSoap(object):
 
@@ -35,5 +36,7 @@ def analisar_retorno(operacao, raiz, xml, retorno, classe):
         classe.Validate_simpletypes_ = False
         resultado = etree.tostring(
             etree.fromstring(retorno.encode('utf-8')))
-        resposta = classe.parseString(resultado, silence=True)
+        parser = XmlParser(context=XmlContext())
+        resposta = parser.from_string(resultado.decode('utf-8'))
+        # resposta = classe.parseString(resultado, silence=True)
     return RetornoSoap(operacao, raiz, xml, retorno, resposta)

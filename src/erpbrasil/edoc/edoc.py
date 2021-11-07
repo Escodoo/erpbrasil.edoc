@@ -43,7 +43,7 @@ class DocumentoEletronico(ABC):
         if type(ds) == _Element:
             return etree.tostring(ds), ds
         if isinstance(ds, str):
-            return ds, etree.fromstring(ds)
+            return ds, etree.fromstring(ds.encode('ascii'))
         # if isinstance(ds, unicode):
         #     return ds, etree.fromstring(ds)
 
@@ -60,13 +60,21 @@ class DocumentoEletronico(ABC):
                 namespacedef_=namespace
             )
         else:
-            ds.export(
-                output,
-                0,
-                pretty_print=pretty_print,
+            # ds.export(
+            #     output,
+            #     0,
+            #     pretty_print=pretty_print,
+            # )
+            from xsdata.formats.dataclass.serializers.config import SerializerConfig
+            from xsdata.formats.dataclass.serializers import XmlSerializer
+            serializer = XmlSerializer(config=SerializerConfig(pretty_print=True))
+            output = serializer.render(
+                obj=ds,
+                ns_map={None: "http://www.issnetonline.com.br/webserviceabrasf/vsd/servico_consultar_nfse_rps_envio.xsd"}
             )
-        contents = output.getvalue()
-        output.close()
+        # contents = output.getvalue()
+        # output.close()
+        contents = output.encode('ascii')
         return contents, etree.fromstring(contents)
 
     def _post(self, raiz, url, operacao, classe):

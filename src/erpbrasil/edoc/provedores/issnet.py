@@ -21,6 +21,14 @@ try:
     from nfselib.issnet.v1_00 import servico_consultar_situacao_lote_rps_envio
     from nfselib.issnet.v1_00 import servico_consultar_situacao_lote_rps_resposta
     from nfselib.issnet.v1_00 import servico_enviar_lote_rps_resposta
+    from nfselib.issnet.v1_00.tipos_complexos import (
+        TcIdentificacaoPrestador,
+        TcIdentificacaoRps,
+        TcCpfCnpj,
+        TcInfPedidoCancelamento,
+        TcIdentificacaoNfse,
+
+    )
     issnet = True
 except ImportError:
     issnet = False
@@ -100,34 +108,34 @@ class Issnet(NFSe):
     def _prepara_consulta_recibo(self, proc_envio):
         raiz = servico_consultar_situacao_lote_rps_envio.ConsultarSituacaoLoteRpsEnvio(
             # Id=self._gera_numero_lote(),
-            Prestador=servico_consultar_situacao_lote_rps_envio.tcIdentificacaoPrestador(
-                CpfCnpj=servico_consultar_situacao_lote_rps_envio.tcCpfCnpj(
-                    Cnpj=self.cnpj_prestador,
+            prestador=TcIdentificacaoPrestador(
+                cpf_cnpj=TcCpfCnpj(
+                    cnpj=self.cnpj_prestador,
                 ),
-                InscricaoMunicipal=self.im_prestador
+                inscricao_municipal=self.im_prestador
             ),
-            Protocolo=proc_envio.resposta.Protocolo
+            protocolo=proc_envio.resposta.Protocolo
         )
         # xml_assinado = self.assina_raiz(raiz,"")
         xml_string, xml_etree = self._generateds_to_string_etree(raiz)
-        xml_string = '<?xml version="1.0"?>' + xml_string
-        return xml_string
+        # xml_string = '<?xml version="1.0"?>' + xml_string
+        return xml_string.decode('utf-8')
 
     def _prepara_consultar_lote_rps(self, protocolo):
         raiz = servico_consultar_lote_rps_envio.ConsultarLoteRpsEnvio(
             # Id=self._gera_numero_lote(),
-            Prestador=servico_consultar_lote_rps_envio.tcIdentificacaoPrestador(
-                CpfCnpj=servico_consultar_lote_rps_envio.tcCpfCnpj(
-                    Cnpj=self.cnpj_prestador,
+            prestador=TcIdentificacaoPrestador(
+                cpf_cnpj=TcCpfCnpj(
+                    cnpj=self.cnpj_prestador,
                 ),
-                InscricaoMunicipal=self.im_prestador
+                inscricao_municipal=self.im_prestador
             ),
-            Protocolo=protocolo
+            protocolo=protocolo
         )
         # xml_assinado = self.assina_raiz(raiz, raiz.Id)
         xml_string, xml_etree = self._generateds_to_string_etree(raiz)
-        xml_string = '<?xml version="1.0"?>' + xml_string
-        return xml_string
+        # xml_string = '<?xml version="1.0"?>' + xml_string
+        return xml_string.decode('utf-8')
 
     def _verifica_resposta_envio_sucesso(self, proc_envio):
         if proc_envio.resposta.Protocolo:
@@ -140,18 +148,18 @@ class Issnet(NFSe):
         return False
 
     def _prepara_cancelar_nfse_envio(self, doc_numero):
-        raiz = servico_cancelar_nfse_envio.tcPedidoCancelamento(
-            InfPedidoCancelamento=servico_cancelar_nfse_envio.tcInfPedidoCancelamento(
+        raiz = servico_cancelar_nfse_envio.CancelarNfseEnvio(
+            pedido=TcInfPedidoCancelamento(
                 id=doc_numero,
-                IdentificacaoNfse=servico_cancelar_nfse_envio.tcIdentificacaoNfse(
-                    Numero=doc_numero,
-                    Cnpj=self.cnpj_prestador,
-                    InscricaoMunicipal=self.im_prestador,
-                    CodigoMunicipio=self.cidade
+                identificacao_nfse=TcIdentificacaoNfse(
+                    numero=doc_numero,
+                    cnpj=self.cnpj_prestador,
+                    inscricao_municipal=self.im_prestador,
+                    codigo_municipio=self.cidade
                     if self.ambiente == '1'
                     else 999,
                 ),
-                CodigoCancelamento='0001'
+                codigo_cancelamento='0001'
             )
         )
 
@@ -175,22 +183,22 @@ class Issnet(NFSe):
         rps_tipo = kwargs.get('rps_type')
 
         raiz = servico_consultar_nfse_rps_envio.ConsultarNfseRpsEnvio(
-            IdentificacaoRps=servico_consultar_nfse_rps_envio.tcIdentificacaoRps(
-                Numero=rps_numero,
-                Serie=rps_serie,
-                Tipo=rps_tipo,
+            identificacao_rps=TcIdentificacaoRps(
+                numero=rps_numero,
+                serie=rps_serie,
+                tipo=rps_tipo,
             ),
-            Prestador=servico_consultar_nfse_rps_envio.tcIdentificacaoPrestador(
-                CpfCnpj=servico_consultar_nfse_rps_envio.tcCpfCnpj(
-                    Cnpj=self.cnpj_prestador,
+            prestador=TcIdentificacaoPrestador(
+                cpf_cnpj=TcCpfCnpj(
+                    cnpj=self.cnpj_prestador,
                 ),
-                InscricaoMunicipal=self.im_prestador
+                inscricao_municipal=self.im_prestador
             ),
         )
         xml_string, xml_etree = self._generateds_to_string_etree(raiz)
-        xml_string = '<?xml version="1.0"?>' + xml_string
+        # xml_string = '<?xml version="1.0"?>' + xml_string
 
-        return xml_string
+        return xml_string.decode('utf-8')
 
     def analisa_retorno_consulta(self, processo, number, company_cnpj_cpf,
                                  company_legal_name):
