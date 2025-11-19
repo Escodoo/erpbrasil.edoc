@@ -13,44 +13,44 @@ from erpbrasil.edoc.nfse import ServicoNFSe
 
 try:
     from erpbrasil.assinatura.assinatura import Assinatura
-    from nfselib.paulistana.v02 import PedidoCancelamentoNFe
-    from nfselib.paulistana.v02 import PedidoConsultaLote
-    from nfselib.paulistana.v02 import PedidoConsultaNFe
-    from nfselib.paulistana.v02 import RetornoCancelamentoNFe
-    from nfselib.paulistana.v02 import RetornoConsulta
-    from nfselib.paulistana.v02 import RetornoEnvioLoteRPS
+    from nfselib.paulistana.v03 import PedidoCancelamentoNFe_v02
+    from nfselib.paulistana.v03 import PedidoConsultaLote_v02
+    from nfselib.paulistana.v03 import PedidoConsultaNFe_v02
+    from nfselib.paulistana.v03 import RetornoCancelamentoNFe_v02
+    from nfselib.paulistana.v03 import RetornoConsulta_v02
+    from nfselib.paulistana.v03 import RetornoEnvioLoteRPS_v02
     paulistana = True
 except ImportError:
     paulistana = False
 
-endpoint = 'ws/lotenfe.asmx?WSDL'
+endpoint = "lotenfe.asmx?WSDL"
 
 if paulistana:
     servicos_base = {
         'consulta_recibo': ServicoNFSe(
             'ConsultaLote',
-            endpoint, RetornoConsulta, True),
+            endpoint, RetornoConsulta_v02, True),
 
         'consulta_nfse_rps': ServicoNFSe(
             'ConsultaNFe',
-            endpoint, RetornoConsulta, True),
+            endpoint, RetornoConsulta_v02, True),
 
         'cancela_documento': ServicoNFSe(
             'CancelamentoNFe',
-            endpoint, RetornoCancelamentoNFe, True),
+            endpoint, RetornoCancelamentoNFe_v02, True),
     }
 
     servicos_hml = {
         'envia_documento': ServicoNFSe(
             'TesteEnvioLoteRPS',
-            endpoint, RetornoEnvioLoteRPS, True),
+            endpoint, RetornoEnvioLoteRPS_v02, True),
     }
     servicos_hml.update(servicos_base.copy())
 
     servicos_prod = {
         'envia_documento': ServicoNFSe(
             'EnvioLoteRPS',
-            endpoint, RetornoEnvioLoteRPS, True),
+            endpoint, RetornoEnvioLoteRPS_v02, True),
     }
     servicos_prod.update(servicos_base.copy())
 
@@ -60,7 +60,7 @@ class Paulistana(NFSe):
     def __init__(self, transmissao, ambiente, cidade_ibge, cnpj_prestador,
                  im_prestador):
 
-        self._url = 'https://nfe.prefeitura.sp.gov.br'
+        self._url = "https://nfews.prefeitura.sp.gov.br"
 
         # Não tem URL de homologação mas tem métodos para testes
         # no mesmo webservice
@@ -76,11 +76,9 @@ class Paulistana(NFSe):
     def _prepara_envia_documento(self, edoc):
         assinador = Assinatura(self._transmissao.certificado)
         for rps in edoc.RPS:
-            data = rps.Assinatura
-            data_bytes = data.encode('ascii')
-            assinatura = assinador.sign_pkcs1v15_sha1(data_bytes)
-            rps.Assinatura = b64encode(assinatura).decode()
-        xml_assinado = self.assina_raiz(edoc, '')
+            assinatura_bytes = assinador.sign_pkcs1v15_sha1(rps.Assinatura)
+            rps.Assinatura = assinatura_bytes
+        xml_assinado = self.assina_raiz(edoc, "")
         return xml_assinado
 
     def _verifica_resposta_envio_sucesso(self, proc_envio):
@@ -98,10 +96,10 @@ class Paulistana(NFSe):
         numero_lote = int(retorno.find('.//NumeroLote').text)
         cnpj = retorno.find('.//CNPJ').text
 
-        edoc = PedidoConsultaLote.PedidoConsultaLote(
-            Cabecalho=PedidoConsultaLote.CabecalhoType(
-                Versao=1,
-                CPFCNPJRemetente=PedidoConsultaNFe.tpCPFCNPJ(CNPJ=cnpj),
+        edoc = PedidoConsultaLote_v02.PedidoConsultaLote(
+            Cabecalho=PedidoConsultaLote_v02.CabecalhoType(
+                Versao=2,
+                CPFCNPJRemetente=PedidoConsultaNFe_v02.tpCPFCNPJ(CNPJ=cnpj),
                 NumeroLote=numero_lote
             )
         )
@@ -116,13 +114,13 @@ class Paulistana(NFSe):
         rps_serie = kwargs.get("serie_rps")
         rps_numero = kwargs.get("numero_rps")
 
-        raiz = PedidoConsultaNFe.PedidoConsultaNFe(
-            Cabecalho=PedidoConsultaNFe.CabecalhoType(
-                Versao=1,
-                CPFCNPJRemetente=PedidoConsultaNFe.tpCPFCNPJ(CNPJ=cnpj_prestador)
+        raiz = PedidoConsultaNFe_v02.PedidoConsultaNFe(
+            Cabecalho=PedidoConsultaNFe_v02.CabecalhoType(
+                Versao=2,
+                CPFCNPJRemetente=PedidoConsultaNFe_v02.tpCPFCNPJ(CNPJ=cnpj_prestador)
             ),
-            Detalhe=[PedidoConsultaNFe.DetalheType(
-                ChaveRPS=PedidoConsultaNFe.tpChaveRPS(
+            Detalhe=[PedidoConsultaNFe_v02.DetalheType(
+                ChaveRPS=PedidoConsultaNFe_v02.tpChaveRPS(
                     InscricaoPrestador=int(inscricao_prestador),
                     SerieRPS=rps_serie,
                     NumeroRPS=int(rps_numero),
@@ -152,16 +150,16 @@ class Paulistana(NFSe):
         numero_nfse = doc_numero.get('numero_nfse')
         codigo_verificacao = doc_numero.get('codigo_verificacao') or ''
 
-        assinatura = self.im_prestador.zfill(8)
+        assinatura = self.im_prestador.zfill(12)
         assinatura += numero_nfse.zfill(12)
 
-        raiz = PedidoCancelamentoNFe.PedidoCancelamentoNFe(
-            Cabecalho=PedidoCancelamentoNFe.CabecalhoType(
-                Versao=1,
-                CPFCNPJRemetente=PedidoConsultaNFe.tpCPFCNPJ(CNPJ=self.cnpj_prestador),
+        raiz = PedidoCancelamentoNFe_v02.PedidoCancelamentoNFe(
+            Cabecalho=PedidoCancelamentoNFe_v02.CabecalhoType(
+                Versao=2,
+                CPFCNPJRemetente=PedidoConsultaNFe_v02.tpCPFCNPJ(CNPJ=self.cnpj_prestador),
             ),
-            Detalhe=[PedidoCancelamentoNFe.DetalheType(
-                ChaveNFe=PedidoCancelamentoNFe.tpChaveNFe(
+            Detalhe=[PedidoCancelamentoNFe_v02.DetalheType(
+                ChaveNFe=PedidoCancelamentoNFe_v02.tpChaveNFe(
                     InscricaoPrestador=int(self.im_prestador),
                     NumeroNFe=int(numero_nfse),
                     CodigoVerificacao=codigo_verificacao.zfill(8),
