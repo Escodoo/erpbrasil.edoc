@@ -39,6 +39,7 @@ class NFSe(DocumentoEletronico):
         super().__init__(transmissao)
 
     def _post(self, body, servico):
+        import wdb; wdb.set_trace()
         header_string = None
         if self._header:
             header_string, header_etree = self._generateds_to_string_etree(self._header)
@@ -50,6 +51,12 @@ class NFSe(DocumentoEletronico):
 
         if header and header.attrib:
             header_string = header.attrib.get("Versao")
+
+        # TODO: HACK-BARUERI
+        if self.cidade == 3505708:
+            # body_string, body_etree = self._generateds_to_string_etree(body)
+            # header = body_etree.find("Cabecalho")
+            header_string = "1"
 
         if header_string:
             with self._transmissao.cliente(
@@ -75,6 +82,7 @@ class NFSe(DocumentoEletronico):
         time.sleep(self._tempo_medio)
 
     def envia_documento(self, edoc):
+        import wdb; wdb.set_trace()
         return self._post(
             body=self._prepara_envia_documento(edoc),
             servico=self._servicos[self.envia_documento.__name__],

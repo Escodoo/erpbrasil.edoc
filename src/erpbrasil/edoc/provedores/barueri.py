@@ -2,6 +2,8 @@
 
 
 import xml.etree.ElementTree as ET
+import logging
+_logger = logging.getLogger(__name__)
 from datetime import datetime
 
 from lxml import etree
@@ -65,7 +67,23 @@ class Barueri(NFSe):
         # edoc.LoteRps.ListaRps.Rps[0].InfRps.Id
         return edoc.LoteRps.Id, edoc.LoteRps.NumeroLote
 
+    # def _prepara_envia_documento(self, edoc):
+    #     import wdb; wdb.set_trace()
+    #     numero_lote = self._gera_numero_lote()
+    #     xml_string, xml_etree = self._generateds_to_string_etree(edoc)
+    #     root = etree.Element(
+    #          "NFeLoteEnviarArquivo", xmlns="http://www.barueri.sp.gov.br/nfe"
+    #     )
+    #     versao_schema = etree.SubElement(root, "VersaoSchema")
+    #     versao_schema.text = "1"
+    #     mensagem_xml = etree.SubElement(root, "MensagemXML")
+    #     mensagem_xml.text = etree.CDATA(edoc.ArquivoRPSBase64)
+    #     edoc.ApenasValidaArq = "lote" + numero_lote
+    #     _logger.info(xml_string)
+    #     return mensagem_xml
+
     def _prepara_envia_documento(self, edoc):
+        import wdb; wdb.set_trace()
         numero_lote = self._gera_numero_lote()
         xml_string, xml_etree = self._generateds_to_string_etree(edoc)
         root = etree.Element(
