@@ -52,7 +52,7 @@ if paulistana:
 
 class Paulistana(NFSe):
     def __init__(
-        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
     ):
         self._url = "https://nfe.prefeitura.sp.gov.br"
 
@@ -65,7 +65,7 @@ class Paulistana(NFSe):
             self._servicos = servicos_prod
 
         super().__init__(
-            transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+            transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
         )
 
     def _prepara_envia_documento(self, edoc):

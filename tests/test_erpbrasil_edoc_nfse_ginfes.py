@@ -40,6 +40,7 @@ class Tests(TestCertificateMixin, TestCase):
             ambiente="2",
             cidade_ibge=3132404,
             cnpj_prestador=misc.punctuation_rm("23.130.935/0001-98"),
+            cnpj_tomador=misc.punctuation_rm("23.130.935/0001-98"),
             im_prestador=misc.punctuation_rm("35172"),
         )
 

@@ -59,7 +59,7 @@ class Issnet(NFSe):
     _header = None
 
     def __init__(
-        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
     ):
         if ambiente == "2":
             self._url = "https://www.issnetonline.com.br/webserviceabrasf/homologacao/"
@@ -72,7 +72,7 @@ class Issnet(NFSe):
         self._servicos = servicos
 
         super().__init__(
-            transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+            transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
         )
 
     def get_documento_id(self, edoc):

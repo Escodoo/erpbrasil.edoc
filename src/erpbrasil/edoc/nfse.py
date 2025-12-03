@@ -30,11 +30,12 @@ class NFSe(DocumentoEletronico):
     _edoc_situacao_servico_em_operacao = "TODO"
 
     def __init__(
-        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
     ):
         self.ambiente = ambiente
         self.cidade = cidade_ibge
         self.cnpj_prestador = cnpj_prestador
+        self.cnpj_tomador = cnpj_tomador
         self.im_prestador = im_prestador
         super().__init__(transmissao)
 

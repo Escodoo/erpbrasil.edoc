@@ -44,6 +44,7 @@
 #             ambiente='2',
 #             cidade_ibge=3550308,
 #             cnpj_prestador=misc.punctuation_rm('07.865.699/0001-00'),
+#             cnpj_tomador=misc.punctuation_rm('07.865.699/0001-00'),
 #             im_prestador=misc.punctuation_rm('3.570.741-0'),
 #         )
 #

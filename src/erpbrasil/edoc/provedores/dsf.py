@@ -52,7 +52,7 @@ if dsf:
 
 class Dsf(NFSe):
     def __init__(
-        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+        self, transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
     ):
         # DSS só tem uma URL
         self._url = url[int(cidade_ibge)]
@@ -66,7 +66,7 @@ class Dsf(NFSe):
             self._servicos = servicos_hml
 
         super().__init__(
-            transmissao, ambiente, cidade_ibge, cnpj_prestador, im_prestador
+            transmissao, ambiente, cidade_ibge, cnpj_prestador, cnpj_tomador, im_prestador
         )
 
     def envia_documento(self, edoc):
