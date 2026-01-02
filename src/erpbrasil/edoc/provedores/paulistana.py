@@ -149,16 +149,17 @@ class Paulistana(NFSe):
     def _prepara_cancelar_nfse_envio(self, doc_numero):
         numero_nfse = doc_numero.get('numero_nfse')
         codigo_verificacao = doc_numero.get('codigo_verificacao') or ''
-
         assinatura_raw = (
-            self.im_prestador.zfill(12)
+            self.im_prestador.zfill(8)
             + numero_nfse.zfill(12)
         )
 
         raiz = PedidoCancelamentoNFe_v02.PedidoCancelamentoNFe(
             Cabecalho=PedidoCancelamentoNFe_v02.CabecalhoType(
                 Versao=2,
-                CPFCNPJRemetente=PedidoConsultaNFe_v02.tpCPFCNPJ(CNPJ=self.cnpj_prestador),
+                CPFCNPJRemetente=PedidoConsultaNFe_v02.tpCPFCNPJ(
+                    CNPJ=self.cnpj_prestador
+                ),
             ),
             Detalhe=[PedidoCancelamentoNFe_v02.DetalheType(
                 ChaveNFe=PedidoCancelamentoNFe_v02.tpChaveNFe(
@@ -171,11 +172,13 @@ class Paulistana(NFSe):
         )
 
         assinador = Assinatura(self._transmissao.certificado)
+
         for detalhe in raiz.Detalhe:
             assinatura_bytes = assinador.sign_pkcs1v15_sha1(
                 assinatura_raw.encode('ascii')
             )
             detalhe.AssinaturaCancelamento = assinatura_bytes
+
         xml_assinado = self.assina_raiz(raiz, '')
         return xml_assinado
 
